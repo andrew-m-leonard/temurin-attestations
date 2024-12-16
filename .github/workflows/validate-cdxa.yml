@@ -42,12 +42,13 @@ jobs:
       - name: Validate CDXA documents using cyclonedx-cli
         run: |
           ls -l
-          XML_FILES=$(gh pr view 4089 --repo https://github.com/adoptium/temurin-build.git --json files | jq -r '.files[] | .path')
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path')
           for XML_FILE in "$XML_FILES"; do
-              echo "File: $XML_FILE"
+              echo "CycloneDX validating file: $XML_FILE"
               ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
           done
         env:
+          REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
