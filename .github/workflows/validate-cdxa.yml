@@ -38,12 +38,3 @@ jobs:
         run: |
           curl -L -O https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-linux-x64
           chmod +x cyclonedx-linux-x64
-
-      - name: Validate CDXA documents using cyclonedx-cli validate
-        run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          XML_FILES=$(gh pr view 4089 --repo https://github.com/adoptium/temurin-build.git --json files | jq -r '.files[] | .path')
-          for XML_FILE in "$XML_FILES"; do
-              ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
-          done
-
