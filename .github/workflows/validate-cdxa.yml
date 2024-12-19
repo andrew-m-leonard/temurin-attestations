@@ -47,6 +47,7 @@ jobs:
               ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
               echo "Verifying Signature of file: $XML_FILE using public key $XML_FILE.sign.pub"
               ./cyclonedx-linux-x64 verify all "$XML_FILE" --key-file "$XML_FILE.sign.pub"
+              xpath -q -e '/bom' "$XML_FILE"
           done
         env:
           REPOSITORY: ${{ github.repository }}
