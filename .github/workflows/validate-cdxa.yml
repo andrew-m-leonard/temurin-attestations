@@ -41,7 +41,8 @@ jobs:
 
       - name: Install libxml-xpath-perl
         run: |
-          apt-get install libxml-xpath-perl
+          sudo apt-get update
+          sudo apt-get install libxml-xpath-perl
 
       - name: Validate CDXA documents using cyclonedx-cli
         run: |
