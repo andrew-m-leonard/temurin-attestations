@@ -39,6 +39,10 @@ jobs:
           curl -L -O https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-linux-x64
           chmod +x cyclonedx-linux-x64
 
+      - name: Install libxml-xpath-perl
+        run: |
+          apt-get install libxml-xpath-perl
+
       - name: Validate CDXA documents using cyclonedx-cli
         run: |
           XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$")
