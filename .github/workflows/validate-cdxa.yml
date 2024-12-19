@@ -53,6 +53,8 @@ jobs:
               echo "Verifying Signature of file: $XML_FILE using public key $XML_FILE.sign.pub"
               ./cyclonedx-linux-x64 verify all "$XML_FILE" --key-file "$XML_FILE.sign.pub"
               xpath -q -e '/bom' "$XML_FILE"
+              # Ensure 1 VERIFIED_REPRODUCIBLE_BUILD
+              [ $(xpath -q -e 'count(/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"])' "$XML_FILE") -eq 1 ]
           done
         env:
           REPOSITORY: ${{ github.repository }}
