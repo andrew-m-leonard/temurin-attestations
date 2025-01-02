@@ -86,8 +86,8 @@ jobs:
                   JDK_BUILD="jdk-$MAJOR_VERSION+$BUILD_NUM"
               else
                   echo "$XML_FILE file name is not of the correct format:"
-                  echo "    N/jdk_M_0_U_B_(Platform)_(Your Organisation).xml"
-                  echo " or N/jdk_M_B_(Platform)_(Your Organisation).xml"
+                  echo "    N/jdk_M_0_U_B_(Arch)_(OS)_(Your Organisation).xml"
+                  echo " or N/jdk_M_B_(Arch)_(OS)_(Your Organisation).xml"
                   exit 1
               fi
 
