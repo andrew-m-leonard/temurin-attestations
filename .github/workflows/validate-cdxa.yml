@@ -52,9 +52,23 @@ jobs:
               ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
               echo "Verifying Signature of file: $XML_FILE using public key $XML_FILE.sign.pub"
               ./cyclonedx-linux-x64 verify all "$XML_FILE" --key-file "$XML_FILE.sign.pub"
+          done
+        env:
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Validate CDXA content meets Temurin attestation requirements
+        run: |
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$")
+          echo "$XML_FILES" | while read XML_FILE; do
               xpath -q -e '/bom' "$XML_FILE"
               # Ensure 1 VERIFIED_REPRODUCIBLE_BUILD
               [ $(xpath -q -e 'count(/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"])' "$XML_FILE") -eq 1 ]
+              # Get "target"
+              TARGET_BOM_REF=$(xpath -q -e '/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../target/text()' "$XML_FILE")
+              # Verify target with bom-ref exists
+              [ $(xpath -q -e 'count(/bom/declarations/targets/components/component[@bom-ref='"${TARGET_BOM_REF}"'])' "$XML_FILE") -eq 2 ] 
           done
         env:
           REPOSITORY: ${{ github.repository }}
