@@ -64,23 +64,25 @@ jobs:
           echo "$XML_FILES" | while read XML_FILE; do
               # Validate filename
 
-              if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+              if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for update version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
                   MAJOR_VERSION=${BASH_REMATCH[2]}
                   UPDATE_VERSION=${BASH_REMATCH[3]}
                   BUILD_NUM=${BASH_REMATCH[4]}
-                  PLATFORM=${BASH_REMATCH[5]}
-                  ORG=${BASH_REMATCH[6]}
+                  PLATFORM_ARCH=${BASH_REMATCH[5]}
+                  PLATFORM_OS=${BASH_REMATCH[6]}
+                  ORG=${BASH_REMATCH[7]}
                   JDK_BUILD="jdk-$MAJOR_VERSION.0.$UPDATE_VERSION+$BUILD_NUM"
-              elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+              elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for new version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
                   MAJOR_VERSION=${BASH_REMATCH[2]}
                   UPDATE_VERSION="0"
                   BUILD_NUM=${BASH_REMATCH[3]}
-                  PLATFORM=${BASH_REMATCH[4]}
-                  ORG=${BASH_REMATCH[5]}
+                  PLATFORM_ARCH=${BASH_REMATCH[4]}
+                  PLATFORM_OS=${BASH_REMATCH[5]}
+                  ORG=${BASH_REMATCH[6]}
                   JDK_BUILD="jdk-$MAJOR_VERSION+$BUILD_NUM"
               else
                   echo "$XML_FILE file name is not of the correct format:"
@@ -107,7 +109,7 @@ jobs:
 
               # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM>
               COMPONENT_NAME=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/name/text()' "$XML_FILE")
-              pattern="^Temurin $JDK_BUILD $PLATFORM\$"
+              pattern="^Temurin ${JDK_BUILD} ${PLATFORM_ARCH}_${PLATFORM_OS}\$"
               pattern=${pattern//\./\\\.}
               pattern=${pattern//\+/\\\+}
               if [[ ! "$COMPONENT_NAME" =~ $pattern ]]; then
