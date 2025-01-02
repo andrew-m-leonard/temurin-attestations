@@ -107,13 +107,31 @@ jobs:
                   exit 1
               fi
 
-              # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM>
+              # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM_ARCH>_<PLATFORM_OS>
               COMPONENT_NAME=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/name/text()' "$XML_FILE")
               pattern="^Temurin ${JDK_BUILD} ${PLATFORM_ARCH}_${PLATFORM_OS}\$"
               pattern=${pattern//\./\\\.}
               pattern=${pattern//\+/\\\+}
               if [[ ! "$COMPONENT_NAME" =~ $pattern ]]; then
                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name($COMPONENT_NAME) is not the correct format: $pattern"
+                  exit 1
+              fi
+
+              # Verify Component.version of format: <JDK_BUILD>
+              COMPONENT_VERSION=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/version/text()' "$XML_FILE")
+              pattern="^${JDK_BUILD}\$"
+              pattern=${pattern//\./\\\.}
+              pattern=${pattern//\+/\\\+}
+              if [[ ! "$COMPONENT_VERSION" =~ $pattern ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/version($COMPONENT_VERSION) is not the correct value: $pattern"
+                  exit 1
+              fi
+
+              # Verify Component.version of format: <PLATFORM_ARCH>_<PLATFORM_OS>
+              COMPONENT_PLATFORM=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/properties/property[@name="platform"]/text()' "$XML_FILE")
+              pattern="^${PLATFORM_ARCH}_${PLATFORM_OS}\$"
+              if [[ ! "$COMPONENT_PLATFORM" =~ $pattern ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/properties/property[@name='platform']($COMPONENT_PLATFORM) is not the correct value: $pattern"
                   exit 1
               fi
           done
