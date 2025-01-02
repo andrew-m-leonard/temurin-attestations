@@ -68,7 +68,10 @@ jobs:
               # Get "target"
               TARGET_BOM_REF=$(xpath -q -e '/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../target/text()' "$XML_FILE")
               # Verify target with bom-ref exists
-              [ $(xpath -q -e 'count(/bom/declarations/targets/components/component[@bom-ref='"${TARGET_BOM_REF}"'])' "$XML_FILE") -eq 2 ] 
+              if ! [ $(xpath -q -e 'count(/bom/declarations/targets/components/component[@bom-ref='"$TARGET_BOM_REF"'])' "$XML_FILE") -eq 2 ]; then
+                  echo "ERROR: $XML_FILE CDXA document does not contain a /bom/declarations/targets/components/component with 'bom-ref' == $TARGET_BOM_REF"
+                  exit 1
+              fi
           done
         env:
           REPOSITORY: ${{ github.repository }}
