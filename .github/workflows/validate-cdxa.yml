@@ -127,7 +127,7 @@ jobs:
                   exit 1
               fi
 
-              # Verify Component.version of format: <PLATFORM_ARCH>_<PLATFORM_OS>
+              # Verify Component.property(platform) of format: <PLATFORM_ARCH>_<PLATFORM_OS>
               COMPONENT_PLATFORM=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/properties/property[@name="platform"]/text()' "$XML_FILE")
               pattern="^${PLATFORM_ARCH}_${PLATFORM_OS}\$"
               if [[ ! "$COMPONENT_PLATFORM" =~ $pattern ]]; then
