@@ -108,7 +108,7 @@ jobs:
               # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM>
               COMPONENT_NAME=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/name/text()' "$XML_FILE")
               if [[ ! "$COMPONENT_NAME" =~ ^Temurin\ $JDK_BUILD\ $PLATFORM ]]; then
-                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name is not the correct format: Temurin <JDK_BUILD> <PLATFORM>"
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name($COMPONENT_NAME) is not the correct format: Temurin <JDK_BUILD> <PLATFORM>"
                   exit 1
               fi
           done
