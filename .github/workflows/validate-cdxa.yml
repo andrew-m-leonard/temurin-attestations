@@ -109,29 +109,33 @@ jobs:
 
               # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM_ARCH>_<PLATFORM_OS>
               COMPONENT_NAME=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/name/text()' "$XML_FILE")
-              pattern="^Temurin ${JDK_BUILD} ${PLATFORM_ARCH}_${PLATFORM_OS}\$"
-              pattern=${pattern//\./\\\.}
-              pattern=${pattern//\+/\\\+}
-              if [[ ! "$COMPONENT_NAME" =~ $pattern ]]; then
-                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name($COMPONENT_NAME) is not the correct format: $pattern"
+              VALID_VALUE="Temurin ${JDK_BUILD} ${PLATFORM_ARCH}_${PLATFORM_OS}"
+              if [[ ! "$COMPONENT_NAME" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name($COMPONENT_NAME) is not the correct format: $VALID_VALUE"
                   exit 1
               fi
 
               # Verify Component.version of format: <JDK_BUILD>
               COMPONENT_VERSION=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/version/text()' "$XML_FILE")
-              pattern="^${JDK_BUILD}\$"
-              pattern=${pattern//\./\\\.}
-              pattern=${pattern//\+/\\\+}
-              if [[ ! "$COMPONENT_VERSION" =~ $pattern ]]; then
-                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/version($COMPONENT_VERSION) is not the correct value: $pattern"
+              VALID_VALUE="${JDK_BUILD}"
+              if [[ ! "$COMPONENT_VERSION" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/version($COMPONENT_VERSION) is not the correct value: $VALID_VALUE"
                   exit 1
               fi
 
               # Verify Component.property(platform) of format: <PLATFORM_ARCH>_<PLATFORM_OS>
               COMPONENT_PLATFORM=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/properties/property[@name="platform"]/text()' "$XML_FILE")
-              pattern="^${PLATFORM_ARCH}_${PLATFORM_OS}\$"
-              if [[ ! "$COMPONENT_PLATFORM" =~ $pattern ]]; then
-                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/properties/property[@name='platform']($COMPONENT_PLATFORM) is not the correct value: $pattern"
+              VALID_VALUE="${PLATFORM_ARCH}_${PLATFORM_OS}"
+              if [[ ! "$COMPONENT_PLATFORM" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/properties/property[@name='platform']($COMPONENT_PLATFORM) is not the correct value: $VALID_VALUE"
+                  exit 1
+              fi
+
+              # Verify Component.externalReferences.reference(distribution).url matches https://api.adoptium.net/v3/binary/version/<release>/<os>/<arch>/jdk/hotspot/normal/eclipse
+              EXT_REF_URL=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/externalReferences/reference[@type="distribution"]/url/text()' "$XML_FILE")
+              VALID_VALUE="https://api.adoptium.net/v3/binary/version/${JDK_BUILD}/${PLATFORM_OS}/${PLATFORM_ARCH}/jdk/hotspot/normal/eclipse"
+              if [[ ! "$EXT_REF_URL" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/url($EXT_REF_URL) is not the correct value: $VALID_VALUE"
                   exit 1
               fi
           done
