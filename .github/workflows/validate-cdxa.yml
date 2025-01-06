@@ -63,7 +63,6 @@ jobs:
           XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$")
           echo "$XML_FILES" | while read XML_FILE; do
               # Validate filename
-
               if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for update version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
