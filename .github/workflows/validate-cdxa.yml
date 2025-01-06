@@ -170,7 +170,7 @@ jobs:
 
               # Verify assessor bom-ref against attestation
               ASSESSOR_BOM_REF=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/@bom-ref' "$XML_FILE")
-              ATTESTATION_ASSESSOR=$(xpath -q -e '/bom/declarations/attestations/attestations[1]/assessor/text()' "$XML_FILE")
+              ATTESTATION_ASSESSOR=$(xpath -q -e '/bom/declarations/attestations/attestation[1]/assessor/text()' "$XML_FILE")
               if [[ ! "$ATTESTATION_ASSESSOR" = "$ASSESSOR_BOM_REF" ]]; then
                    echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/assessor($ATTESTATION_ASSESSOR) does not match /bom/declarations/assessors/assessor/@bom-ref($ASSESSOR_BOM_REF)"
                    exit 1
@@ -178,7 +178,7 @@ jobs:
 
               # Verify claim bom-ref against attestation
               CLAIM_BOM_REF=$(xpath -q -e '/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../@bom-ref' "$XML_FILE")
-              ATTESTATION_CLAIM=$(xpath -q -e '/bom/declarations/attestations/attestations[1]/map/claims/claim[1]/text()' "$XML_FILE")
+              ATTESTATION_CLAIM=$(xpath -q -e '/bom/declarations/attestations/attestation[1]/map/claims/claim[1]/text()' "$XML_FILE")
               if [[ ! "$ATTESTATION_CLAIM" = "$CLAIM_BOM_REF" ]]; then
                    echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/map/claims/claim($ATTESTATION_CLAIM) does not match /bom/declarations/claims/claim/@bom-ref($CLAIM_BOM_REF)"
                    exit 1
