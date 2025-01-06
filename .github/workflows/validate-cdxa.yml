@@ -138,6 +138,14 @@ jobs:
                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/url($EXT_REF_URL) is not the correct value: $VALID_VALUE"
                   exit 1
               fi
+
+              # Verify hash matches Adoptium published hash for the given release
+              ADOPTIUM_HASH=$(curl -L https://api.adoptium.net/v3/checksum/version/${JDK_BUILD}/${PLATFORM_OS}/${PLATFORM_ARCH}/jdk/hotspot/normal/eclipse | cut -d' ' -f1)
+              CDXA_HASH=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/externalReferences/reference[@type="distribution"]/hashes/hash[@alg='SHA-256']/text()' "$XML_FILE")
+              if [[ ! "$ADOPTIUM_HASH" = "$CDXA_HASH" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/hashes/hash[SHA-256]($CDXA_HASH) is not the correct value: $ADOPTIUM_HASH"
+                  exit 1
+              fi
           done
         env:
           REPOSITORY: ${{ github.repository }}
