@@ -146,6 +146,56 @@ jobs:
                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/hashes/hash[SHA-256]($CDXA_HASH) is not the correct value: $ADOPTIUM_HASH"
                   exit 1
               fi
+
+              # Verify one assessor exists
+              if ! [ $(xpath -q -e 'count(/bom/declarations/assessors/assessor)' "$XML_FILE") -eq 1 ]; then
+                  echo "ERROR: $XML_FILE CDXA document does not contain a single /bom/declarations/assessors/assessor"
+                  exit 1
+              fi
+
+              # Verify assessor is thirdParty
+              ASSESSOR_THIRD_PARTY=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/thirdParty/text()' "$XML_FILE")
+              VALID_VALUE="true"
+              if [[ ! "$ASSESSOR_THIRD_PARTY" = "$VALID_VALUE" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/assessors/assessor[1]/thirdParty($ASSESSOR_THIRD_PARTY) is not the correct value: $VALID_VALUE"
+                   exit 1
+              fi
+
+              # Verify assessor has an organization name
+              ASSESSOR_ORG_NAME=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/organization/name/text()' "$XML_FILE")
+              if [[ -z "$ASSESSOR_ORG_NAME" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/assessors/assessor/organization/name is not specified"
+                   exit 1
+              fi
+
+              # Verify assessor bom-ref against attestation
+              ASSESSOR_BOM_REF=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/@bom-ref' "$XML_FILE")
+              ATTESTATION_ASSESSOR=$(xpath -q -e '/bom/declarations/attestations/attestations[1]/assessor/text()' "$XML_FILE")
+              if [[ ! "$ATTESTATION_ASSESSOR" = "$ASSESSOR_BOM_REF" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/assessor($ATTESTATION_ASSESSOR) does not match /bom/declarations/assessors/assessor/@bom-ref($ASSESSOR_BOM_REF)"
+                   exit 1
+              fi
+
+              # Verify claim bom-ref against attestation
+              CLAIM_BOM_REF=$(xpath -q -e '/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../@bom-ref' "$XML_FILE")
+              ATTESTATION_CLAIM=$(xpath -q -e '/bom/declarations/attestations/attestations[1]/map/claims/claim[1]/text()' "$XML_FILE")
+              if [[ ! "$ATTESTATION_CLAIM" = "$CLAIM_BOM_REF" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/map/claims/claim($ATTESTATION_CLAIM) does not match /bom/declarations/claims/claim/@bom-ref($CLAIM_BOM_REF)"
+                   exit 1
+              fi
+
+              # Verify an affirmation exists
+              if ! [ $(xpath -q -e 'count(/bom/declarations/affirmation)' "$XML_FILE") -eq 1 ]; then
+                   echo "ERROR: $XML_FILE CDXA document does not contain a /bom/declarations/affirmation"
+                   exit 1
+              fi
+
+              # Verify affirmation has a statement
+              AFFIRMATION_STMT=$(xpath -q -e '/bom/declarations/affirmation/statement' "$XML_FILE")
+              if [[ -z "$AFFIRMATION_STMT" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/affirmation/statement is not specified"
+                   exit 1
+              fi
           done
         env:
           REPOSITORY: ${{ github.repository }}
