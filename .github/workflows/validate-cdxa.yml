@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  validate_and_verify_cyclonedx_cdxa:
+  validate_cyclonedx_cdxa:
     name: validate_cdxa
     runs-on: ubuntu-latest
 
