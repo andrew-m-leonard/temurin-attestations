@@ -47,12 +47,14 @@ jobs:
       - name: Validate CDXA documents using cyclonedx-cli
         run: |
           XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$ || true")
-          echo "$XML_FILES" | while read XML_FILE; do
+          if [[ -n "$XML_FILES" ]]; then
+            echo "$XML_FILES" | while read XML_FILE; do
               echo "CycloneDX validating file: $XML_FILE"
               ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
               echo "Verifying Signature of file: $XML_FILE using public key $XML_FILE.sign.pub"
               ./cyclonedx-linux-x64 verify all "$XML_FILE" --key-file "$XML_FILE.sign.pub"
-          done
+            done
+          fi
         env:
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -60,8 +62,9 @@ jobs:
 
       - name: Validate CDXA content meets Temurin attestation requirements
         run: |
-          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$")
-          echo "$XML_FILES" | while read XML_FILE; do
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$" || true)
+          if [[ -n "$XML_FILES" ]]; then
+            echo "$XML_FILES" | while read XML_FILE; do
               # Validate filename
               if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for update version $XML_FILE"
@@ -195,7 +198,8 @@ jobs:
                    echo "ERROR: $XML_FILE CDXA document /bom/declarations/affirmation/statement is not specified"
                    exit 1
               fi
-          done
+            done
+          fi
         env:
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
