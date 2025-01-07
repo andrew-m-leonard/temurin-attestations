@@ -46,7 +46,7 @@ jobs:
 
       - name: Validate CDXA documents using cyclonedx-cli
         run: |
-          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$ || true")
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$" || true)
           if [[ -n "$XML_FILES" ]]; then
             echo "$XML_FILES" | while read XML_FILE; do
               echo "CycloneDX validating file: $XML_FILE"
