@@ -38,3 +38,170 @@ jobs:
         run: |
           curl -L -O https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/cyclonedx-linux-x64
           chmod +x cyclonedx-linux-x64
+
+      - name: Install libxml-xpath-perl
+        run: |
+          sudo apt-get update
+          sudo apt-get install libxml-xpath-perl
+
+      - name: Validate CDXA documents using cyclonedx-cli
+        run: |
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$" || true)
+          if [[ -n "$XML_FILES" ]]; then
+            echo "$XML_FILES" | while read XML_FILE; do
+              echo "CycloneDX validating file: $XML_FILE"
+              ./cyclonedx-linux-x64 validate --input-file "$XML_FILE" --fail-on-errors --input-version v1_6
+              echo "Verifying Signature of file: $XML_FILE using public key $XML_FILE.sign.pub"
+              ./cyclonedx-linux-x64 verify all "$XML_FILE" --key-file "$XML_FILE.sign.pub"
+            done
+          fi
+        env:
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Validate CDXA content meets Temurin attestation requirements
+        run: |
+          XML_FILES=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json files | jq -r '.files[] | .path' | grep "\.xml$" || true)
+          if [[ -n "$XML_FILES" ]]; then
+            echo "$XML_FILES" | while read XML_FILE; do
+              # Validate filename
+              if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+                  echo "Valid CDXA file name for update version $XML_FILE"
+                  MAJOR_FOLDER=${BASH_REMATCH[1]}
+                  MAJOR_VERSION=${BASH_REMATCH[2]}
+                  UPDATE_VERSION=${BASH_REMATCH[3]}
+                  BUILD_NUM=${BASH_REMATCH[4]}
+                  PLATFORM_ARCH=${BASH_REMATCH[5]}
+                  PLATFORM_OS=${BASH_REMATCH[6]}
+                  ORG=${BASH_REMATCH[7]}
+                  JDK_BUILD="jdk-$MAJOR_VERSION.0.$UPDATE_VERSION+$BUILD_NUM"
+              elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+                  echo "Valid CDXA file name for new version $XML_FILE"
+                  MAJOR_FOLDER=${BASH_REMATCH[1]}
+                  MAJOR_VERSION=${BASH_REMATCH[2]}
+                  UPDATE_VERSION="0"
+                  BUILD_NUM=${BASH_REMATCH[3]}
+                  PLATFORM_ARCH=${BASH_REMATCH[4]}
+                  PLATFORM_OS=${BASH_REMATCH[5]}
+                  ORG=${BASH_REMATCH[6]}
+                  JDK_BUILD="jdk-$MAJOR_VERSION+$BUILD_NUM"
+              else
+                  echo "$XML_FILE file name is not of the correct format:"
+                  echo "    N/jdk_M_0_U_B_(Arch)_(OS)_(Your Organisation).xml"
+                  echo " or N/jdk_M_B_(Arch)_(OS)_(Your Organisation).xml"
+                  exit 1
+              fi
+
+              # Print bom content
+              xpath -q -e '/bom' "$XML_FILE"
+
+              # Ensure 1 VERIFIED_REPRODUCIBLE_BUILD
+              if ! [ $(xpath -q -e 'count(/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"])' "$XML_FILE") -eq 1 ]; then
+                  echo "ERROR: $XML_FILE CDXA document does not contain a /bom/declarations/claims/claim/predicate with value VERIFIED_REPRODUCIBLE_BUILD"
+                  exit 1
+              fi
+
+              # Verify claim target with bom-ref exists
+              TARGET_BOM_REF=$(xpath -q -e '/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../target/text()' "$XML_FILE")
+              if ! [ $(xpath -q -e 'count(/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"])' "$XML_FILE") -eq 1 ]; then
+                  echo "ERROR: $XML_FILE CDXA document does not contain a /bom/declarations/targets/components/component with 'bom-ref' == $TARGET_BOM_REF"
+                  exit 1
+              fi
+
+              # Verify Component.name of format: Temurin <JDK_BUILD> <PLATFORM_ARCH>_<PLATFORM_OS>
+              COMPONENT_NAME=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/name/text()' "$XML_FILE")
+              VALID_VALUE="Temurin ${JDK_BUILD} ${PLATFORM_ARCH}_${PLATFORM_OS}"
+              if [[ ! "$COMPONENT_NAME" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/name($COMPONENT_NAME) is not the correct format: $VALID_VALUE"
+                  exit 1
+              fi
+
+              # Verify Component.version of format: <JDK_BUILD>
+              COMPONENT_VERSION=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/version/text()' "$XML_FILE")
+              VALID_VALUE="${JDK_BUILD}"
+              if [[ ! "$COMPONENT_VERSION" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/version($COMPONENT_VERSION) is not the correct value: $VALID_VALUE"
+                  exit 1
+              fi
+
+              # Verify Component.property(platform) of format: <PLATFORM_ARCH>_<PLATFORM_OS>
+              COMPONENT_PLATFORM=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/properties/property[@name="platform"]/text()' "$XML_FILE")
+              VALID_VALUE="${PLATFORM_ARCH}_${PLATFORM_OS}"
+              if [[ ! "$COMPONENT_PLATFORM" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/properties/property[@name='platform']($COMPONENT_PLATFORM) is not the correct value: $VALID_VALUE"
+                  exit 1
+              fi
+
+              # Verify Component.externalReferences.reference(distribution).url matches https://api.adoptium.net/v3/binary/version/<release>/<os>/<arch>/jdk/hotspot/normal/eclipse
+              EXT_REF_URL=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/externalReferences/reference[@type="distribution"]/url/text()' "$XML_FILE")
+              VALID_VALUE="https://api.adoptium.net/v3/binary/version/${JDK_BUILD}/${PLATFORM_OS}/${PLATFORM_ARCH}/jdk/hotspot/normal/eclipse"
+              if [[ ! "$EXT_REF_URL" = "$VALID_VALUE" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/url($EXT_REF_URL) is not the correct value: $VALID_VALUE"
+                  exit 1
+              fi
+
+              # Verify hash matches Adoptium published hash for the given release
+              ADOPTIUM_HASH=$(curl -L https://api.adoptium.net/v3/checksum/version/${JDK_BUILD}/${PLATFORM_OS}/${PLATFORM_ARCH}/jdk/hotspot/normal/eclipse | cut -d' ' -f1)
+              CDXA_HASH=$(xpath -q -e '/bom/declarations/targets/components/component[@bom-ref="'$TARGET_BOM_REF'"]/externalReferences/reference[@type="distribution"]/hashes/hash[@alg="SHA-256"]/text()' "$XML_FILE")
+              if [[ ! "$ADOPTIUM_HASH" = "$CDXA_HASH" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document /bom/declarations/targets/components/component/externalReferences/reference[@type='distribution']/hashes/hash[SHA-256]($CDXA_HASH) is not the correct value: $ADOPTIUM_HASH"
+                  exit 1
+              fi
+
+              # Verify one assessor exists
+              if ! [ $(xpath -q -e 'count(/bom/declarations/assessors/assessor)' "$XML_FILE") -eq 1 ]; then
+                  echo "ERROR: $XML_FILE CDXA document does not contain a single /bom/declarations/assessors/assessor"
+                  exit 1
+              fi
+
+              # Verify assessor is thirdParty
+              ASSESSOR_THIRD_PARTY=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/thirdParty/text()' "$XML_FILE")
+              VALID_VALUE="true"
+              if [[ ! "$ASSESSOR_THIRD_PARTY" = "$VALID_VALUE" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/assessors/assessor[1]/thirdParty($ASSESSOR_THIRD_PARTY) is not the correct value: $VALID_VALUE"
+                   exit 1
+              fi
+
+              # Verify assessor has an organization name
+              ASSESSOR_ORG_NAME=$(xpath -q -e '/bom/declarations/assessors/assessor[1]/organization/name/text()' "$XML_FILE")
+              if [[ -z "$ASSESSOR_ORG_NAME" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/assessors/assessor/organization/name is not specified"
+                   exit 1
+              fi
+
+              # Verify assessor bom-ref against attestation
+              ASSESSOR_BOM_REF=$(xpath -q -e 'string(/bom/declarations/assessors/assessor[1]/@bom-ref)' "$XML_FILE")
+              ATTESTATION_ASSESSOR=$(xpath -q -e '/bom/declarations/attestations/attestation[1]/assessor/text()' "$XML_FILE")
+              if [[ ! "$ATTESTATION_ASSESSOR" = "$ASSESSOR_BOM_REF" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/assessor($ATTESTATION_ASSESSOR) does not match /bom/declarations/assessors/assessor/@bom-ref($ASSESSOR_BOM_REF)"
+                   exit 1
+              fi
+
+              # Verify claim bom-ref against attestation
+              CLAIM_BOM_REF=$(xpath -q -e 'string(/bom/declarations/claims/claim/predicate[text()="VERIFIED_REPRODUCIBLE_BUILD"]/../@bom-ref)' "$XML_FILE")
+              ATTESTATION_CLAIM=$(xpath -q -e '/bom/declarations/attestations/attestation[1]/map/claims/claim[1]/text()' "$XML_FILE")
+              if [[ ! "$ATTESTATION_CLAIM" = "$CLAIM_BOM_REF" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/attestations/attestations/map/claims/claim($ATTESTATION_CLAIM) does not match /bom/declarations/claims/claim/@bom-ref($CLAIM_BOM_REF)"
+                   exit 1
+              fi
+
+              # Verify an affirmation exists
+              if ! [ $(xpath -q -e 'count(/bom/declarations/affirmation)' "$XML_FILE") -eq 1 ]; then
+                   echo "ERROR: $XML_FILE CDXA document does not contain a /bom/declarations/affirmation"
+                   exit 1
+              fi
+
+              # Verify affirmation has a statement
+              AFFIRMATION_STMT=$(xpath -q -e '/bom/declarations/affirmation/statement' "$XML_FILE")
+              if [[ -z "$AFFIRMATION_STMT" ]]; then
+                   echo "ERROR: $XML_FILE CDXA document /bom/declarations/affirmation/statement is not specified"
+                   exit 1
+              fi
+            done
+          fi
+        env:
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
