@@ -67,7 +67,7 @@ jobs:
             echo "$XML_FILES" | while read XML_FILE; do
               # Validate filename
               if [[ "$XML_FILE" =~ ^([0-9]+)/jdk-([0-9]+)\.0\.([0-9]+)\+([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
-                  echo "Valid CDXA file name for update version $XML_FILE"
+                  echo "CDXA file name for update version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
                   TAG_MAJOR_VERSION=${BASH_REMATCH[2]}
                   TAG_UPDATE_VERSION=${BASH_REMATCH[3]}
@@ -81,7 +81,7 @@ jobs:
                   ORG=${BASH_REMATCH[10]}
                   JDK_BUILD="jdk-$MAJOR_VERSION.0.$UPDATE_VERSION+$BUILD_NUM"
               elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk-([0-9]+)\+([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
-                  echo "Valid CDXA file name for new version $XML_FILE"
+                  echo "CDXA file name for new version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
                   TAG_MAJOR_VERSION=${BASH_REMATCH[2]}
                   TAG_UPDATE_VERSION="0"
