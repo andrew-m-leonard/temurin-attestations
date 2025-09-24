@@ -1,5 +1,5 @@
 # ********************************************************************************
-# Copyright (c) 2024 Contributors to the Eclipse Foundation
+# Copyright (c) 2024, 2025 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) with this work for additional
 # information regarding copyright ownership.
@@ -66,30 +66,44 @@ jobs:
           if [[ -n "$XML_FILES" ]]; then
             echo "$XML_FILES" | while read XML_FILE; do
               # Validate filename
-              if [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+              if [[ "$XML_FILE" =~ ^([0-9]+)/jdk-([0-9]+)\.0\.([0-9]+)\+([0-9]+)/jdk_([0-9]+)_0_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for update version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
-                  MAJOR_VERSION=${BASH_REMATCH[2]}
-                  UPDATE_VERSION=${BASH_REMATCH[3]}
-                  BUILD_NUM=${BASH_REMATCH[4]}
-                  PLATFORM_ARCH=${BASH_REMATCH[5]}
-                  PLATFORM_OS=${BASH_REMATCH[6]}
-                  ORG=${BASH_REMATCH[7]}
+                  TAG_MAJOR_VERSION=${BASH_REMATCH[2]}
+                  TAG_UPDATE_VERSION=${BASH_REMATCH[3]}
+                  TAG_BUILD=${BASH_REMATCH[4]}
+                  FULL_TAG="jdk-$TAG_MAJOR_VERSION.0.$TAG_UPDATE_VERSION+$TAG_BUILD"
+                  MAJOR_VERSION=${BASH_REMATCH[5]}
+                  UPDATE_VERSION=${BASH_REMATCH[6]}
+                  BUILD_NUM=${BASH_REMATCH[7]}
+                  PLATFORM_ARCH=${BASH_REMATCH[8]}
+                  PLATFORM_OS=${BASH_REMATCH[9]}
+                  ORG=${BASH_REMATCH[10]}
                   JDK_BUILD="jdk-$MAJOR_VERSION.0.$UPDATE_VERSION+$BUILD_NUM"
-              elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
+              elif [[ "$XML_FILE" =~ ^([0-9]+)/jdk-([0-9]+)\+([0-9]+)/jdk_([0-9]+)_([0-9]+)_([^_]+)_([^_]+)_([^\._]+)\.xml$ ]]; then
                   echo "Valid CDXA file name for new version $XML_FILE"
                   MAJOR_FOLDER=${BASH_REMATCH[1]}
-                  MAJOR_VERSION=${BASH_REMATCH[2]}
+                  TAG_MAJOR_VERSION=${BASH_REMATCH[2]}
+                  TAG_UPDATE_VERSION="0"
+                  TAG_BUILD=${BASH_REMATCH[3]}
+                  FULL_TAG="jdk-$TAG_MAJOR_VERSION+$TAG_BUILD"
+                  MAJOR_VERSION=${BASH_REMATCH[4]}
                   UPDATE_VERSION="0"
-                  BUILD_NUM=${BASH_REMATCH[3]}
-                  PLATFORM_ARCH=${BASH_REMATCH[4]}
-                  PLATFORM_OS=${BASH_REMATCH[5]}
-                  ORG=${BASH_REMATCH[6]}
+                  BUILD_NUM=${BASH_REMATCH[5]}
+                  PLATFORM_ARCH=${BASH_REMATCH[6]}
+                  PLATFORM_OS=${BASH_REMATCH[7]}
+                  ORG=${BASH_REMATCH[8]}
                   JDK_BUILD="jdk-$MAJOR_VERSION+$BUILD_NUM"
               else
                   echo "$XML_FILE file name is not of the correct format:"
-                  echo "    N/jdk_M_0_U_B_(Arch)_(OS)_(Your Organisation).xml"
-                  echo " or N/jdk_M_B_(Arch)_(OS)_(Your Organisation).xml"
+                  echo "    N/jdk-M.0.U+B/jdk_M_0_U_B_(Arch)_(OS)_(Your Organisation).xml"
+                  echo " or N/jdk-M+B/jdk_M_B_(Arch)_(OS)_(Your Organisation).xml"
+                  exit 1
+              fi
+
+              # Verify FULL_TAG folder is same as CDXA file name version
+              if [[ ! "$FULL_TAG" = "$JDK_BUILD" ]]; then
+                  echo "ERROR: $XML_FILE CDXA document tag folder ($FULL_TAG) does not match the filename version ($JDK_BUILD)"
                   exit 1
               fi
 
