@@ -29,13 +29,13 @@
     <targets>
       <components>
         <component type="application" bom-ref="target-jdk-1">
-          <name>Temurin jdk-21.0.5+11 x64 Linux</name>
-          <version>jdk-21.0.5+11</version>
+          <name>Temurin jdk-25+36 x64_linux</name>
+          <version>jdk-25+36</version>
           <externalReferences>
             <reference type="distribution">
-              <url>https://api.adoptium.net/v3/binary/version/jdk-21.0.5+11/linux/x64/jdk/hotspot/normal/eclipse</url>
+              <url>https://api.adoptium.net/v3/binary/version/jdk-25+36/linux/x64/jdk/hotspot/normal/eclipse</url>
               <hashes>
-                <hash alg="SHA-256">3c654d98404c073b8a7e66bffb27f4ae3e7ede47d13284c132d40a83144bfd8c</hash>
+                <hash alg="SHA-256">12351234237462734</hash>
               </hashes>
             </reference>
           </externalReferences>
