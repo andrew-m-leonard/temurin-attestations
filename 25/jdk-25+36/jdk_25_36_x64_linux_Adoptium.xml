@@ -11,7 +11,7 @@
     </assessors>
     <attestations>
       <attestation>
-        <summary>Eclipse Temurin Attestation</summary>
+        <summary>Eclipse Temurin Attestation 2222222222222222222222222</summary>
         <assessor>assessor-1</assessor>
         <map>
           <claims>
@@ -46,7 +46,7 @@
       </components>
     </targets>
     <affirmation>
-      <statement>Adoptium confirms a verified reproducible build</statement>
+      <statement>Adoptium confirms a verified reproducible build 222222222222222222222</statement>
       <signatories />
     </affirmation>
   </declarations>
