@@ -40,7 +40,8 @@
             </reference>
           </externalReferences>
           <properties>
-               <property name="platform">x64_linux</property>
+		  <property name="platform">x64_linux</property>
+		  <property name="imageType">jdk</property>
           </properties>
         </component>
       </components>
@@ -50,4 +51,4 @@
       <signatories />
     </affirmation>
   </declarations>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>wddobLJfv7sRWV5BVBwtBQHRn0nSBpYxXn+Tv4s2dl0=</DigestValue></Reference></SignedInfo><SignatureValue>XqR31oJ6E9L5UC47vksJvIDrDqWjrSVCYlOutJ0weWmNBdqHI6XrJUkqHKhX3aHvmc+xKIFQFFT5g7I16hQMLrgrh5QeG4gzzwcVcMkDnmi4yLf61/XHwpOVP6XUGFE9aNsDwmdG+O3uW4PhYVUd9MI45NDHziP0w5DQL1AajtCr9aEIRolQUzBCFdKKYQAroBuSZ1rFZEHPQE2/o6dB9nJokeguVY/lD3GrekMR5j/X+JFXoX2cF1cZybntFWeEvWBhQ8TPnDuD3+PSTaydWCDNZo/c028Kn5mrfUvTvClDVC26xuXHeU23tQNu47cJeXcRklEkq0T9CT6pZUFsSsRGzOjvWEYLbxhlj7SGHxXPb6j/ipAO1Ju9LBNrkJ8N1VeUf3LAHJzYu8RNV4IP9kSpNPifdTfz1mtNyDcLp6lUA/CSqGMLNU8nYxQ3gWmhi7ocJrZpBm49V7tPGMTxjMeFM/RlvVjZURD1vvjlvImzHnyBzMYHhDKRuvTU/ftqsKDjxam5Cj7fqD3Q2BtGQUTe0iXZS7XtB88r2QR8yxlMAxeF7QJ394b1tUKyoglMPRpLETm57mwr7Ftfr2XEDuH3ME1iV03/r9fQtGFD/i8sdqJRLke6Nsd4hTz+yRmUM3PAgs2e3tHH6vTdrIW6zizON9vwEA/CBM9dKLPwJoo=</SignatureValue></Signature></bom>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>KwAyrzNfrsyNPUim/jbTmCMc7dlWLH2M3AW8qwjMSi0=</DigestValue></Reference></SignedInfo><SignatureValue>FKWdXnWLRtm95wA+wyQM4wW0L+vqmJSmnlu8YfszzVVNyuIZ5J/8SrV3pz9eHJwUxQPMH/nTVo2ZKv2CJtV9QbQNx+IX5fqOEbpAprns2p1xEnH0fo5lSzy1EAQClhZdrCJ+V1lvopsTwItWtYS93jG8BWREUci+uUTBxavSyWu+YejnEA2fz7CmDlp96GXQ9/ADzcs/Qq8RVLHSaxUDE8K2Br0sf6r7w9b5zeSvLsV7608/FmqF9j0roUEFbZ7ooDbU2Kcd6+hdBu2DHrFXI+CVSUbz6PYjY3moUs+Orc4cyuYcXMu2gwlRRJztFmE4iPBhEVQNCkXYjw8630Oz88Qwm5YL59jFq2pFMv9Rjv9owvUdm/K82NdgqFloVKAwOjwuPIj5Xg5wRD4PiUP+XiadoOIi6AAEgWOPz8Tkju1ACtCbM0lKf16UqVnqOZya+ubFZFia8Ca46sXQlBu4JVnQcMvBPu3JgLHpt/G28yl+kOigNbxbARKTRJ4L5xxKGdW00d33c4vzFnxjDp4dNPHaPfe8FBjIL1xDqKPQNpOgeqc1cPdAtjrp9OMwKFoIKU9jK7Xxvs9xnHCdCeC2Kd7UvuO7Z7h6e4LoIXpg3AKOzbwOIinza+7eY+2XJ+tysO0syd2bzGsXYOpG+pytL/mp5UulxJTzXz2QqI3jNPE=</SignatureValue></Signature></bom>
