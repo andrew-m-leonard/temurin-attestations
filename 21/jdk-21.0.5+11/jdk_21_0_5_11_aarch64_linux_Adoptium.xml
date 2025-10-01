@@ -41,6 +41,8 @@
           </externalReferences>
           <properties>
                <property name="platform">aarch64_linux</property>
+               <property name="imageType">jdk</property>
+               <property name="jvmImpl">hotspot</property>
           </properties>
         </component>
       </components>
