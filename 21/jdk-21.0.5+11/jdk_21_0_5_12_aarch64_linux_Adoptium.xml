@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom serialNumber="urn:uuid:8d36d54f-e666-4c12-be06-ecfef6a0f0ab" version="1" xmlns="http://cyclonedx.org/schema/bom/1.6">
+  <declarations>
+    <assessors>
+      <assessor bom-ref="assessor-1">
+        <thirdParty>true</thirdParty>
+        <organization>
+          <name>Adoptium</name>
+        </organization>
+      </assessor>
+    </assessors>
+    <attestations>
+      <attestation>
+        <summary>Eclipse Temurin Attestation</summary>
+        <assessor>assessor-1</assessor>
+        <map>
+          <claims>
+            <claim>claim-1</claim>
+          </claims>
+        </map>
+      </attestation>
+    </attestations>
+    <claims>
+      <claim bom-ref="claim-1">
+        <target>target-jdk-1</target>
+        <predicate>VERIFIED_REPRODUCIBLE_BUILD</predicate>
+      </claim>
+    </claims>
+    <targets>
+      <components>
+        <component type="application" bom-ref="target-jdk-1">
+          <name>Temurin jdk-21.0.5+12 aarch64_linux</name>
+          <version>jdk-21.0.5+12</version>
+          <externalReferences>
+            <reference type="distribution">
+              <url>https://api.adoptium.net/v3/binary/version/jdk-21.0.5+12/linux/aarch64/jdk/hotspot/normal/eclipse</url>
+              <hashes>
+                <hash alg="SHA-256">3c654d98404c073b8a7e66bffb27f4ae36666667d13284c132d40a83144bfd8c</hash>
+              </hashes>
+            </reference>
+          </externalReferences>
+          <properties>
+               <property name="platform">aarch64_linux</property>
+               <property name="imageType">jdk</property>
+               <property name="jvmImpl">hotspot</property>
+          </properties>
+        </component>
+      </components>
+    </targets>
+    <affirmation>
+      <statement>Adoptium confirms a verified reproducible build 66666666666666666</statement>
+      <signatories />
+    </affirmation>
+  </declarations>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" /><DigestValue>jjn0AYtnP8zD8XvFjczhbV8VeMAXDY8nQT5VPg+ZWuA=</DigestValue></Reference></SignedInfo><SignatureValue>hLehmZoxIvKRKHQWdoU/fKLR0z40gIQqPxPyjIP030G0dE6wehUS1fbPLMTpyDuLLq1hjY6F9anbyMirEfOb8Wwb4STvYOgucd/ohyCj2ZuVydOzeD5DNuwfeqKftMhenHaXP4lWzm+IW5sfkH/rdurMvrEQDk/Mm5GSvleSf9pMzJy00UEETmg5NjXTXskLVbWHxEyLBVxMAn2eval51rMKsOAIJ5CmuBDjDKR12pVCWFFMvVR55wsRVgcGNqFASBTRZAiJPMuqVrCqklxBNXKJyCnOGDKjuReo/QvD5nYdE7lukCwuIDztiFsj59K/9yJDlvREC3T+DELerGM2gQ==</SignatureValue></Signature></bom>
