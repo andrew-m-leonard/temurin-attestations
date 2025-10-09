@@ -5,7 +5,7 @@
       <assessor bom-ref="assessor-1">
         <thirdParty>true</thirdParty>
         <organization>
-          <name>Adoptium</name>
+          <name>IBM</name>
         </organization>
       </assessor>
     </assessors>
@@ -29,18 +29,18 @@
     <targets>
       <components>
         <component type="application" bom-ref="target-jdk-1">
-          <name>Temurin jdk-21.0.5+18 x64 Linux</name>
+          <name>Temurin jdk-21.0.5+18 aarch64 Linux</name>
           <version>jdk-21.0.5+18</version>
           <externalReferences>
             <reference type="distribution">
-              <url>https://api.adoptium.net/v3/binary/version/jdk-21.0.5+18/linux/x64/jdk/hotspot/normal/eclipse</url>
+              <url>https://api.adoptium.net/v3/binary/version/jdk-21.0.5+18/linux/aarch64/jdk/hotspot/normal/eclipse</url>
               <hashes>
-                <hash alg="SHA-256">3c6345999999936c073b8a7e66bffb28888888888887d13284c132d40a83144bfd8c</hash>
+                <hash alg="SHA-256">3c654d98404c073b8a7e66bffb28888888888887d13284c132d40a83144bfd8c</hash>
               </hashes>
             </reference>
           </externalReferences>
           <properties>
-               <property name="platform">x64_linux</property>
+               <property name="platform">aarch64_linux</property>
                <property name="imageType">jdk</property>
                <property name="jvmImpl">hotspot</property>
           </properties>

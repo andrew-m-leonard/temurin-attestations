@@ -35,7 +35,7 @@
             <reference type="distribution">
               <url>https://api.adoptium.net/v3/binary/version/jdk-26+10/linux/x64/jdk/hotspot/normal/eclipse</url>
               <hashes>
-                <hash alg="SHA-256">3c654d98404c073b8a7e66bffb28888888888887d13284c132d40a83144bfd8c</hash>
+                <hash alg="SHA-256">3c654d98111111111111111fb28888888888887d13284c132d40a83144bfd8c</hash>
               </hashes>
             </reference>
           </externalReferences>
